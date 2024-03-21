@@ -4,6 +4,13 @@
  */
 package csc302.oop;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 /**
  *
  * @author EXAMS
@@ -13,6 +20,12 @@ public class Server extends javax.swing.JFrame {
     /**
      * Creates new form Server
      */
+    
+    static ServerSocket serversocket;
+    static Socket socket;
+    static DataInputStream inputstream;
+    static DataOutputStream outputstream;
+    
     public Server() {
         initComponents();
     }
@@ -49,6 +62,11 @@ public class Server extends javax.swing.JFrame {
 
         jButton1.setBackground(getBackground());
         jButton1.setText("Send");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
         jLabel2.setText("Message");
 
@@ -102,10 +120,24 @@ public class Server extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
+    
     private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField1ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jTextField1ActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+            
+        try{
+                  String sendmessage = "";
+                   sendmessage = jTextField1.getText().trim();
+                   jTextArea1.setText(jTextArea1.getText() + "\nServer: " + sendmessage);
+                   outputstream.writeUTF(sendmessage);
+                   jTextField1.setText(" ");
+               }catch(IOException ex){
+                   Logger.getLogger(Server.class.getName()).log(Level.SEVERE,null,ex);
+               }
+            // TODO add your handling code here:
+    }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -140,6 +172,27 @@ public class Server extends javax.swing.JFrame {
                 new Server().setVisible(true);
             }
         });
+        String message ="";
+        try{
+            serversocket = new ServerSocket(1234);
+            socket = serversocket.accept();
+            inputstream = new DataInputStream(socket.getInputStream());
+            outputstream = new DataOutputStream(socket.getOutputStream());
+            
+            while(!message.equalsIgnoreCase("End Connection")){
+                message = inputstream.readUTF();
+                jTextArea1.setText(jTextArea1.getText() + "\nClient: " + message);
+                
+            }
+            socket.close();
+            serversocket.close();
+            inputstream.close();
+            outputstream.close();
+            
+            
+        }catch(Exception e){
+            
+        }
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -148,7 +201,7 @@ public class Server extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTextArea jTextArea1;
+    private static javax.swing.JTextArea jTextArea1;
     private javax.swing.JTextField jTextField1;
     // End of variables declaration//GEN-END:variables
 }

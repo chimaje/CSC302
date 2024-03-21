@@ -8,10 +8,12 @@ import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 /**
  *
  * @author EXAMS
@@ -21,18 +23,16 @@ public class Client extends javax.swing.JFrame {
     /**
      * Creates new form Client
      */
-    private Socket socket;
+    private static Socket socket;
     static DataInputStream inputstream;
     static DataOutputStream outputstream;
-    private PrintWriter out;
-    private BufferedReader in;
-    private String username;
+   
     
     
     public Client() {
         initComponents();
     }
-
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -164,13 +164,14 @@ public class Client extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
+   
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
         
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+
               try{
                   String sendmessage = "";
                    sendmessage = jTextField2.getText().trim();
@@ -180,6 +181,7 @@ public class Client extends javax.swing.JFrame {
                }catch(IOException ex){
                    Logger.getLogger(Server.class.getName()).log(Level.SEVERE,null,ex);
                }
+        
 // TODO add your handling code here:
     }//GEN-LAST:event_jButton2ActionPerformed
 
@@ -217,24 +219,24 @@ public class Client extends javax.swing.JFrame {
             }
         });
             try{
-        String host ="localhost";
-        int port=1234;
-        socket=new Socket(host,port);
-        inputstream= new DataInputStream(socket.getInputStream());
-        outputstream = new DataOutputStream(socket.getOutputStream());
+                String host ="localhost";
+                int port=1234;
+                socket=new Socket(host,port);
+                inputstream= new DataInputStream(socket.getInputStream());
+                outputstream = new DataOutputStream(socket.getOutputStream());
 
-        String message="";
-        while(!message.equalsIgnoreCase("End Connection")){
-            message = inputstream.readUTF();
-           jTextArea1.setText(jTextArea1.getText() + "\nServer: " + message);
-        }
-        socket.close();
-        inputstream.close();
-        outputstream.close();
+                String message="";
+                while(!message.equalsIgnoreCase("End Connection")){
+                    message = inputstream.readUTF();
+                   jTextArea1.setText(jTextArea1.getText() + "\nServer: " + message);
+                }
+                socket.close();
+                inputstream.close();
+                outputstream.close();
 
-    }catch(Exception e){
+            }catch(Exception e){
 
-    }
+            }
     }
     
 
@@ -247,8 +249,10 @@ public class Client extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTextArea jTextArea1;
+    private static javax.swing.JTextArea jTextArea1;
     private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField jTextField2;
     // End of variables declaration//GEN-END:variables
+
+    
 }
