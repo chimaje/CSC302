@@ -5,6 +5,16 @@
  */
 package csc302.oop;
 
+import java.io.ByteArrayOutputStream;
+import javax.sound.sampled.TargetDataLine;
+import java.io.File;
+import java.io.IOException;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.DataLine;
+import javax.swing.JFileChooser;
+import javax.swing.Timer;
+
 /**
  *
  * @author athen
@@ -14,10 +24,65 @@ public class captureaudio extends javax.swing.JFrame {
     /**
      * Creates new form captureaudio
      */
+    TargetDataLine line;
+    ByteArrayOutputStream byteArrayOutputStream;
+    boolean isRecording =false;
+    Timer t;
+    Thread t2;
     public captureaudio() {
         initComponents();
     }
-
+    private void startRecording(){
+        final int sampleRate = 16000;
+        final int SampleSizeInBits =16;
+        final int channel = 1;
+        final boolean bigEndian = false;
+        
+        AudioFormat format = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED,
+                sampleRate,SampleSizeInBits,
+                channel,(SampleSizeInBits/8)*channel,
+                    sampleRate,bigEndian);
+        try{
+            DataLine.Info info = new DataLine.Info(TargetDataLine.class,format);
+            if(!AudioSystem.isLineSupported(info)){
+                System.err.println("Line not supported");
+                return;
+            }
+            line = (TargetDataLine) AudioSystem.getLine(info);
+            line.open(format);
+            line.start();
+            
+            byteArrayOutputStream = new ByteArrayOutputStream();
+            isRecording = true;
+            
+            Thread recordingThread = new Thread(new Runnable(){
+                public void run(){
+                    try{
+                        byte buffer[] = new byte[line.getBufferSize()/5];
+                        while(isRecording){
+                            int count = line.read(buffer,0,buffer.length);
+                            if(count>0){
+                                byteArrayOutputStream.write(buffer,0,count);
+                            }
+                        }
+                    }catch(Exception e){
+                    
+                }
+                }
+            });
+            recordingThread.start();
+            
+        }catch(Exception e){
+            
+        }
+    }
+    void stopRecording(){
+        isRecording = false;
+        line.stop();
+        line.close();
+        JFileChooser fileChooser = new JFileChooser();
+        
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -27,17 +92,62 @@ public class captureaudio extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jFileChooser1 = new javax.swing.JFileChooser();
+        jPanel1 = new javax.swing.JPanel();
+        jButton1 = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
+        jLabel1 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+        jButton1.setText("Start");
+
+        jButton2.setText("stop");
+
+        jLabel1.setText("jLabel1");
+
+        jLabel2.setText("jLabel2");
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(25, 25, 25)
+                .addComponent(jButton1)
+                .addGap(124, 124, 124)
+                .addComponent(jLabel2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 169, Short.MAX_VALUE)
+                .addComponent(jButton2)
+                .addGap(97, 97, 97))
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(219, 219, 219)
+                .addComponent(jLabel1)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addGap(21, 21, 21)
+                .addComponent(jLabel1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 328, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton1)
+                    .addComponent(jButton2)
+                    .addComponent(jLabel2))
+                .addGap(36, 36, 36))
+        );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         pack();
@@ -79,5 +189,11 @@ public class captureaudio extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
+    private javax.swing.JFileChooser jFileChooser1;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JPanel jPanel1;
     // End of variables declaration//GEN-END:variables
 }
