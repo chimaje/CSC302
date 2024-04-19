@@ -283,12 +283,13 @@ public class audiowithclip extends javax.swing.JFrame {
                 pausedPosition = clip.getMicrosecondPosition();
                 clip.stop();
                 jButton6.setText("Resume");
-            }else{
+            }
+            
+        }else{
                 pause=false;
                 clip.start();
                 clip.setMicrosecondPosition(pausedPosition);
                 jButton6.setText("Pause");
-            }
         }
     }//GEN-LAST:event_jButton6ActionPerformed
 

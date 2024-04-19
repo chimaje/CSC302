@@ -5,15 +5,19 @@
  */
 package csc302.oop;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import javax.sound.sampled.TargetDataLine;
 import java.io.File;
 import java.io.IOException;
+import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.swing.JFileChooser;
-import javax.swing.Timer;
+import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  *
@@ -22,16 +26,17 @@ import javax.swing.Timer;
 public class captureaudio extends javax.swing.JFrame {
 
     /**
-     * Creates new form captureaudio
+     * Creates new form 
      */
     TargetDataLine line;
     ByteArrayOutputStream byteArrayOutputStream;
     boolean isRecording =false;
-    Timer t;
+    timer t;
     Thread t2;
     public captureaudio() {
         initComponents();
     }
+    
     private void startRecording(){
         final int sampleRate = 16000;
         final int SampleSizeInBits =16;
@@ -81,8 +86,30 @@ public class captureaudio extends javax.swing.JFrame {
         line.stop();
         line.close();
         JFileChooser fileChooser = new JFileChooser();
-        
+        fileChooser.setDialogTitle("Save Recorded Audio");
+        fileChooser.setFileFilter(new FileNameExtensionFilter("WAV files","wav"));
+        int userSelection = fileChooser.showSaveDialog(this);
+        if (userSelection == JFileChooser.APPROVE_OPTION){
+            File fileToSave = fileChooser.getSelectedFile();
+            if(!fileToSave.getName().toLowerCase().endsWith(".wav")){
+                fileToSave = new File(fileToSave.getParentFile(),fileToSave.getName()+".wav");
+                
+            }
+            try{
+                AudioInputStream audioInputStream = new AudioInputStream(new ByteArrayInputStream(byteArrayOutputStream.toByteArray()),
+                line.getFormat(),byteArrayOutputStream.size());
+                AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, fileToSave);
+                audioInputStream.close();
+                JOptionPane.showMessageDialog(this,"Recording saved successfully.",
+                        "Success",JOptionPane.INFORMATION_MESSAGE);
+            }catch(IOException e){
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(this,"Error saving recording.",
+                        "Error",JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
+   
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -102,8 +129,18 @@ public class captureaudio extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         jButton1.setText("Start");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
         jButton2.setText("stop");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
 
         jLabel1.setText("jLabel1");
 
@@ -152,6 +189,50 @@ public class captureaudio extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+ class timer implements Runnable{
+        int seconds = 0 ;
+        int hours=0;
+        int minutes = 0;
+        int secs=0;
+        @Override
+        public void run(){
+            while(true){
+                try{
+                    hours = seconds/3600;
+                    minutes = (seconds%3600)/60;
+                    secs = seconds%60;
+                    jLabel2.setText(String.format("%02d:%02d:%02d",hours,minutes,secs ));
+                    Thread.sleep(1000);
+                    seconds++;
+                    
+                } catch(Exception e){
+                    
+                }
+            }
+        }
+    }
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        startRecording();
+        jButton1.setEnabled(false);
+        jLabel1.setText("Recording");
+        jButton2.setEnabled(true);
+        t = new timer();
+        t2 = new Thread(t);
+        t2.start();
+        
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        jLabel2.setText(String.format("%02d:%02d:%02d",0,0,0));
+        t2.stop();
+        stopRecording();
+        jButton1.setEnabled(true);
+        jLabel1.setText("Recording Saved");
+        jButton2.setEnabled(true);
+        t = new timer();
+        t2 = new Thread(t);
+        t2.start();
+    }//GEN-LAST:event_jButton2ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -186,7 +267,9 @@ public class captureaudio extends javax.swing.JFrame {
                 new captureaudio().setVisible(true);
             }
         });
+        
     }
+    
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
