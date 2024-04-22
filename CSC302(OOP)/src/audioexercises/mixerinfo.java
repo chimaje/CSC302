@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package csc302.oop;
+package audioexercises;
 
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Line;
